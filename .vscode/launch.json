@@ -1,0 +1,62 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+    
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Chat server",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": ["main:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-keep-alive", "0"],
+            "cwd": "${workspaceFolder}/servers/chat",
+            "envFile": "${workspaceFolder}/.env",
+            "env": {
+                "RAG_URL": "http://localhost:8001/sse",
+                "ALLOWED_ORIGINS": ""
+            },
+            "console": "integratedTerminal",
+            "python": "/opt/anaconda3/envs/lapo/bin/python"
+        },
+        {
+            "name": "RAG server",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/servers/rag/main.py",
+            "cwd": "${workspaceFolder}/servers/rag",
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal",
+            "python": "/opt/anaconda3/envs/lapo/bin/python"
+        },
+        {
+            "name": "Frontend",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "dev"],
+            "cwd": "${workspaceFolder}/client",
+            "console": "integratedTerminal",
+            "serverReadyAction": {
+                "pattern": "Local:.*http://localhost:([0-9]+)",
+                "uriFormat": "http://localhost:%s",
+                "action": "openExternally"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Both servers",
+            "configurations": ["Chat server", "RAG server"]
+        },
+        {
+            "name": "FE, chat and rag",
+            "configurations": ["Chat server", "RAG server", "Frontend"]
+        }
+    ]
+}

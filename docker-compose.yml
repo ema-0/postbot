@@ -1,0 +1,23 @@
+services:
+  chat:
+    build:
+      context: ./servers/chat
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - RAG_URL=http://rag:8001/sse
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+    restart: unless-stopped
+
+  rag:
+    build:
+      context: ./servers/rag             
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - VOYAGE_API_KEY=${VOYAGE_API_KEY}
+    restart: unless-stopped
+  
