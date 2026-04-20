@@ -103,25 +103,33 @@ Next.js chat UI for demo and potential POC handoff.
 
 ---
 
-## Next steps — Deployment
+## Deployment
 
-Three services to deploy:
+### Frontend (`client/`) → Vercel ✓
+- Framework preset: Next.js, root directory: `client/`
+- Env var: `NEXT_PUBLIC_WS_URL=wss://<chat-railway-domain>/chat`
+- Auto-deploys on every push to `main`
 
-### Frontend (`client/`) → Vercel
-- Zero config for Next.js — connect the repo, set `NEXT_PUBLIC_WS_URL` to the deployed chat server URL
-- Free tier sufficient
+### Chat + RAG servers → Railway ✓
+- Railway does **not** support `docker-compose.yml` directly — each service deployed separately with its own Dockerfile
+- RAG service: Dockerfile path `servers/rag/Dockerfile`, build context `servers/rag`
+- Chat service: Dockerfile path `servers/chat/Dockerfile`, build context `servers/chat`
+- RAG does not need a public domain (only chat calls it internally)
+- Chat needs a public domain (Vercel connects to it via WebSocket)
 
-### Chat + RAG servers → Railway (recommended)
-- Railway reads `docker-compose.yml` directly — closest to what already works locally
-- Add env vars (`OPENROUTER_API_KEY`, `VOYAGE_API_KEY`) in Railway dashboard
-- Set `RAG_URL` on the chat service to the Railway internal URL of the rag service
-- Both services get public URLs; chat URL goes into Vercel's `NEXT_PUBLIC_WS_URL`
-- Note: `articles.db` is baked into the RAG image — to update articles, rebuild and redeploy
+### Env vars
+| Service | Variable | Value |
+|---------|----------|-------|
+| rag | `VOYAGE_API_KEY` | from Voyage AI dashboard |
+| chat | `OPENROUTER_API_KEY` | from OpenRouter dashboard |
+| chat | `RAG_URL` | `http://rag.railway.internal:8001/sse` |
+| chat | `ALLOWED_ORIGINS` | `https://<vercel-domain>` (no trailing slash) |
+| vercel | `NEXT_PUBLIC_WS_URL` | `wss://<chat-railway-domain>/chat` |
 
-### Order of operations
-1. Deploy RAG server → get its URL
-2. Deploy chat server with `RAG_URL` pointing to RAG → get its URL
-3. Deploy frontend with `NEXT_PUBLIC_WS_URL` pointing to chat server
+### Notes
+- `articles.db` is baked into the RAG image — to update articles, rebuild and redeploy
+- Railway free tier pauses services after inactivity — cold start on first request
+- `--timeout-keep-alive 0` is required in the chat Dockerfile CMD to prevent uvicorn from dropping the WebSocket while waiting for the LLM response
 
 ---
 
