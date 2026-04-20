@@ -10,7 +10,7 @@ router = APIRouter()
 
 MODEL = "openai/gpt-4o-mini"
 RAG_URL = os.environ.get("RAG_URL", "http://localhost:8001/sse")
-ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "").split(",")
+ALLOWED_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()]
 MAX_TOOL_ITERATIONS = 5
 
 SYSTEM_PROMPT = """Sei un assistente che risponde a domande su politica, economia e attualità italiana.
