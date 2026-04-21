@@ -4,7 +4,42 @@ I'm building a RAG (Retrieval-Augmented Generation) chat that answers questions 
 
 ## Done
 
-### Step 1 — RSS feed parser (`retrieval/feed_parser.py`)
+## How to update the corpus
+
+All scripts run from the `retrieval/` folder with the `lapo` conda env.
+
+**1. Fetch article metadata** (pick one or both):
+```bash
+# From RSS feeds (last ~10 articles per feed)
+python -c "from feed_parser import fetch_all; fetch_all(['https://www.ilpost.it/feed/', 'https://www.ilpost.it/politica/feed/'])"
+
+# From section pages (20 articles/page, all sections)
+python section_parser.py --sections politica economia mondo --max-pages 20
+```
+
+**2. Scrape, chunk, embed** (all idempotent — skip already-processed rows):
+```bash
+python -c "
+from article_scraper import scrape_all
+from chunker import chunk_all
+from embedder import embed_all
+scrape_all()
+chunk_all()
+embed_all()
+"
+```
+
+**3. Deploy updated DB to Railway:**
+```bash
+cp retrieval/articles.db servers/rag/articles.db
+git add servers/rag/articles.db
+git commit -m "Update articles.db"
+git push  # triggers Railway redeploy automatically
+```
+
+---
+
+### Step 1a — RSS feed parser (`retrieval/feed_parser.py`)
 
 Fetches articles from ilpost.it RSS feeds and stores metadata in SQLite.
 
@@ -17,6 +52,16 @@ Fetches articles from ilpost.it RSS feeds and stores metadata in SQLite.
 - Deduplicates by URL (SQLite PRIMARY KEY on `url`)
 - Public API: `fetch_feed(url)` / `fetch_all(urls)`
 - DB table: `articles` (url, title, pub_date, categories, summary)
+
+### Step 1b — Section page parser (`retrieval/section_parser.py`)
+
+Fetches article metadata by scraping ilpost.it section pages (e.g. `/politica/`, `/economia/`).
+
+- Parses `__NEXT_DATA__` JSON from section pages — same pattern as article scraper
+- 20 articles per page; each section has hundreds of pages (e.g. `politica` has 342)
+- Deduplicates by URL (same SQLite PRIMARY KEY as feed_parser)
+- CLI: `python section_parser.py --sections politica economia --max-pages 20`
+- Public API: `fetch_section(section, max_pages)` / `fetch_all_sections(max_pages)`
 
 ### Step 2 — Article scraper (`retrieval/article_scraper.py`)
 
@@ -137,4 +182,4 @@ Next.js chat UI for demo and potential POC handoff.
 
 - ~~**Scraper whitespace bug**: adjacent HTML elements concatenated without space~~ ✓ fixed
 - **No conversation persistence**: chat history lives in memory, lost on disconnect — no sidebar, no session reload
-- **Small corpus**: prototype runs on 19 articles (2 feeds × ~10 articles) — expand feeds and article count for a real demo
+- ~~**Small corpus**: prototype runs on 19 articles~~ ✓ expanded to 1533 articles (5274 chunks) via section_parser
