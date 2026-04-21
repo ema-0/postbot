@@ -32,10 +32,8 @@ embed_all()
 **3. Deploy updated DB to Railway:**
 ```bash
 cp retrieval/articles.db servers/rag/articles.db
-git add servers/rag/articles.db
-git commit -m "Update articles.db"
-git push  # triggers Railway redeploy automatically
 ```
+Then upload `servers/rag/articles.db` manually to the Railway volume via the Railway dashboard or CLI (`railway volume upload`). The RAG service reads from `/data/articles.db` (configured via `DB_PATH` env var). `articles.db` is gitignored and not pushed to the repo.
 
 ---
 
