@@ -81,13 +81,17 @@ def retrieve(query: str, top_k: int = 6) -> list[dict]:
     query_vector = response.embeddings[0]
     print("[RAG] query embedded, loading vectors from DB...", flush=True)
 
-    with sqlite3.connect(DB_PATH) as conn:
-        rows = conn.execute("""
-            SELECT e.chunk_id, e.vector, c.text, c.url, a.title, a.pub_date, a.categories
-            FROM embeddings e
-            JOIN chunks c ON e.chunk_id = c.id
-            JOIN articles a ON c.url = a.url
-        """).fetchall()
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            rows = conn.execute("""
+                SELECT e.chunk_id, e.vector, c.text, c.url, a.title, a.pub_date, a.categories
+                FROM embeddings e
+                JOIN chunks c ON e.chunk_id = c.id
+                JOIN articles a ON c.url = a.url
+            """).fetchall()
+    except Exception as e:
+        print(f"[RAG] DB error: {e}", flush=True)
+        raise
 
     print(f"[RAG] loaded {len(rows)} vectors, computing similarity...", flush=True)
     scored = []
