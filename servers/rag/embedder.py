@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import voyageai
 
-DB_PATH = Path(os.environ.get("DB_PATH", Path(__file__).parent / "articles.db"))
+DB_PATH = Path(__file__).parent / "articles.db"
 MODEL = "voyage-3-lite"
 BATCH_SIZE = 128  # Voyage AI supports up to 128 inputs per request
 
