@@ -4,6 +4,6 @@ WORKDIR /app
 
 RUN pip install "mcp[cli]" voyageai numpy
 
-COPY main.py embedder.py articles.db ./
+COPY main.py embedder.py ./
 
 CMD ["python", "main.py"]
