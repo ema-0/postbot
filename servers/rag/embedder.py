@@ -75,9 +75,11 @@ def retrieve(query: str, top_k: int = 6) -> list[dict]:
     if not api_key:
         raise RuntimeError("VOYAGE_API_KEY environment variable not set")
 
+    print("[RAG] embedding query...", flush=True)
     client = voyageai.Client(api_key=api_key)
     response = client.embed([query], model=MODEL, input_type="query")
     query_vector = response.embeddings[0]
+    print("[RAG] query embedded, loading vectors from DB...", flush=True)
 
     with sqlite3.connect(DB_PATH) as conn:
         rows = conn.execute("""
@@ -87,6 +89,7 @@ def retrieve(query: str, top_k: int = 6) -> list[dict]:
             JOIN articles a ON c.url = a.url
         """).fetchall()
 
+    print(f"[RAG] loaded {len(rows)} vectors, computing similarity...", flush=True)
     scored = []
     for chunk_id, vector_json, text, url, title, pub_date, categories in rows:
         vector = json.loads(vector_json)
