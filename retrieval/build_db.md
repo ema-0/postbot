@@ -33,7 +33,9 @@ embed_all()
 ```bash
 cp retrieval/articles.db servers/rag/articles.db
 ```
-Then upload `servers/rag/articles.db` manually to the Railway volume via the Railway dashboard or CLI (`railway volume upload`). The RAG service reads from `/data/articles.db` (configured via `DB_PATH` env var). `articles.db` is gitignored and not pushed to the repo.
+Then upload `servers/rag/articles.db` manually to the Railway volume via the Railway dashboard or CLI (`railway volume upload`). The RAG service reads from `/data/articles.db` (configured via `DB_PATH` env var).
+
+`retrieval/articles.db` is gitignored — it holds the full scraped corpus and is never pushed. The `servers/rag/articles.db` file committed to the repo is a small demo DB (a few articles, truncated text) meant only to show the schema and let the RAG server boot for local testing; do not overwrite it with the full corpus.
 
 ---
 
