@@ -30,7 +30,7 @@ User → chat server (WebSocket) → agentic loop → RAG MCP tool → similarit
 | `client.py` | Minimal CLI client for testing the chat server directly |
 | `docker-compose.yml` | Runs `chat` + `rag` services together locally |
 
-See `retrieval/build_db.md` for corpus-building details and `servers/chat/agentic_loop.md` for the MCP/agentic loop protocol.
+See `retrieval/build_db.md` for corpus-building details.
 
 ## Setup
 
