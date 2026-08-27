@@ -42,13 +42,19 @@ See `retrieval/build_db.md` for corpus-building details.
    VOYAGE_API_KEY=...
    ALLOWED_ORIGINS=http://localhost:3000
    ```
-2. Run the chat + RAG servers:
+2. Run the chat + RAG servers, either with Docker:
    ```bash
    docker compose up --build
    ```
-   This starts the RAG server (port 8001, internal) and the chat server (port 8000, WebSocket at `/chat`).
+   or directly with Python (each server has its own `requirements.txt`):
+   ```bash
+   cd servers/rag && pip install -r requirements.txt && python main.py &
+   cd servers/chat && pip install -r requirements.txt && uvicorn main:app --port 8000
+   ```
+   Either way, the RAG server runs on port 8001 (internal) and the chat server on port 8000 (WebSocket at `/chat`).
 3. Talk to it either via the CLI client:
    ```bash
+   pip install websockets
    python client.py
    ```
    or the web client:
@@ -67,6 +73,7 @@ To build a real corpus, use the scripts in `retrieval/` (see `retrieval/build_db
 
 ```bash
 cd retrieval
+pip install -r requirements.txt
 python -c "from feed_parser import fetch_all; fetch_all(['https://www.ilpost.it/feed/'])"
 python -c "
 from article_scraper import scrape_all

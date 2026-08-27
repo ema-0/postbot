@@ -2,7 +2,8 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN pip install "mcp[cli]" voyageai numpy
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY main.py embedder.py articles.db ./
 
